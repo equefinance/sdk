@@ -6,11 +6,12 @@
     "moduleResolution": "bundler",
     "moduleDetection": "force",
     "strict": true,
+    "types": ["node"],
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "test", "tsup.config.ts"]
+  "include": ["src", "test", "scripts", "tsup.config.ts"]
 }
