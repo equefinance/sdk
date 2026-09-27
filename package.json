@@ -28,15 +28,23 @@
     "dev": "tsup --watch",
     "sync:addresses": "node scripts/sync-addresses.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\""
   },
   "dependencies": {
     "viem": "^2.56.9"
   },
   "devDependencies": {
+    "@types/node": "^24.0.0",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.9",
     "tsup": "^8.5.1",
     "typescript": "~6.0.3",
-    "vitest": "^5.0.2",
-    "@types/node": "^24.0.0"
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
   }
 }
