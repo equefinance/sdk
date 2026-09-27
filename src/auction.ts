@@ -1,22 +1,9 @@
-import { parseAbi, type Address, type Hash } from 'viem';
+import { erc20Abi } from 'viem';
+import type { Address, Hash } from 'viem';
+import { EpochStrategyAbi, EqueVaultAbi } from './abis';
 import { decodeEpochState, type EpochState } from './epoch';
-import {
-  erc20ApproveAbi,
-  requireSigner,
-  type EquePublicClient,
-  type EqueWalletClient,
-} from './internal';
+import { requireSigner, type EquePublicClient, type EqueWalletClient } from './internal';
 import { nextBidFloor, reserveFloor } from './math';
-
-const strategyAbi = parseAbi([
-  'function bid(uint256 amount)',
-  'function currentEpoch() view returns ((uint128 id, uint128 notional, uint64 start, uint64 auctionEnd, uint64 expiry, uint96 strike, uint96 spot, address highBidder, uint96 highBid, uint256 extensionCount))',
-  'function floorBps() view returns (uint256)',
-  'function state() view returns (uint8)',
-  'event BidPlaced(uint256 indexed epochId, address indexed bidder, uint256 amount)',
-]);
-
-const vaultAbi = parseAbi(['function asset() view returns (address)']);
 
 export interface AuctionBid {
   epochId: bigint;
@@ -63,7 +50,7 @@ export function createAuctionModule(params: AuctionModuleParams): AuctionModule 
     if (cachedToken === undefined) {
       cachedToken = await publicClient.readContract({
         address: vault,
-        abi: vaultAbi,
+        abi: EqueVaultAbi,
         functionName: 'asset',
       });
     }
@@ -72,13 +59,21 @@ export function createAuctionModule(params: AuctionModuleParams): AuctionModule 
 
   const readStatus = async () => {
     const [stateRaw, epoch, floorBps] = await Promise.all([
-      publicClient.readContract({ address: strategy, abi: strategyAbi, functionName: 'state' }),
       publicClient.readContract({
         address: strategy,
-        abi: strategyAbi,
+        abi: EpochStrategyAbi,
+        functionName: 'state',
+      }),
+      publicClient.readContract({
+        address: strategy,
+        abi: EpochStrategyAbi,
         functionName: 'currentEpoch',
       }),
-      publicClient.readContract({ address: strategy, abi: strategyAbi, functionName: 'floorBps' }),
+      publicClient.readContract({
+        address: strategy,
+        abi: EpochStrategyAbi,
+        functionName: 'floorBps',
+      }),
     ]);
     const floor = reserveFloor(epoch.notional, floorBps);
     const overHigh = epoch.highBid === 0n ? 0n : nextBidFloor(epoch.highBid);
@@ -90,7 +85,7 @@ export function createAuctionModule(params: AuctionModuleParams): AuctionModule 
     async approve(amount) {
       return requireSigner(walletClient).writeContract({
         address: await token(),
-        abi: erc20ApproveAbi,
+        abi: erc20Abi,
         functionName: 'approve',
         args: [strategy, amount],
       });
@@ -98,7 +93,7 @@ export function createAuctionModule(params: AuctionModuleParams): AuctionModule 
     async bid(amount) {
       return requireSigner(walletClient).writeContract({
         address: strategy,
-        abi: strategyAbi,
+        abi: EpochStrategyAbi,
         functionName: 'bid',
         args: [amount],
       });
@@ -126,7 +121,7 @@ export function createAuctionModule(params: AuctionModuleParams): AuctionModule 
     watchBids(onBid) {
       return publicClient.watchContractEvent({
         address: strategy,
-        abi: strategyAbi,
+        abi: EpochStrategyAbi,
         eventName: 'BidPlaced',
         strict: true,
         onLogs: (logs) => {

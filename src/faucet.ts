@@ -1,10 +1,6 @@
-import { parseAbi, type Address, type Hash } from 'viem';
+import type { Address, Hash } from 'viem';
+import { TestnetFaucetAbi } from './abis';
 import { requireSigner, type EquePublicClient, type EqueWalletClient } from './internal';
-
-const faucetAbi = parseAbi([
-  'function claimDepositor() returns (uint256)',
-  'function nextDepositorClaim(address wallet) view returns (uint256)',
-]);
 
 export interface FaucetClaimResult {
   claimed: boolean;
@@ -31,7 +27,7 @@ export function createFaucetModule(params: FaucetModuleParams): FaucetModule {
   const nextDepositorClaim = (wallet: Address): Promise<bigint> =>
     publicClient.readContract({
       address: faucet,
-      abi: faucetAbi,
+      abi: TestnetFaucetAbi,
       functionName: 'nextDepositorClaim',
       args: [wallet],
     });
@@ -51,7 +47,7 @@ export function createFaucetModule(params: FaucetModuleParams): FaucetModule {
       }
       const hash = await wallet.writeContract({
         address: faucet,
-        abi: faucetAbi,
+        abi: TestnetFaucetAbi,
         functionName: 'claimDepositor',
       });
       await publicClient.waitForTransactionReceipt({ hash });

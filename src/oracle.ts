@@ -1,14 +1,6 @@
-import { parseAbi, type Address } from 'viem';
-import { type EquePublicClient } from './internal';
-
-const strategyAbi = parseAbi([
-  'function feed() view returns (address aggregator, address sequencerFeed, uint32 heartbeat, uint32 stalenessBuffer, uint32 deviationBps, bool checkMarketHours, bool checkPaused, bool checkSequencer)',
-]);
-
-const aggregatorAbi = parseAbi([
-  'function decimals() view returns (uint8)',
-  'function latestRoundData() view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)',
-]);
+import type { Address } from 'viem';
+import { EpochStrategyAbi, MockV3AggregatorAbi } from './abis';
+import type { EquePublicClient } from './internal';
 
 interface FeedConfig {
   aggregator: Address;
@@ -22,6 +14,7 @@ export interface OracleSpot {
   updatedAt: number;
   ageSeconds: number;
   heartbeatSeconds: number;
+  /** Mirrors the strategy's own check: updatedAt + heartbeat + buffer in the past. */
   stale: boolean;
 }
 
@@ -44,7 +37,7 @@ export function createOracleModule(params: OracleModuleParams): OracleModule {
     if (cachedFeed === undefined) {
       const [aggregator, , heartbeat, stalenessBuffer] = await publicClient.readContract({
         address: strategy,
-        abi: strategyAbi,
+        abi: EpochStrategyAbi,
         functionName: 'feed',
       });
       cachedFeed = { aggregator, heartbeat, stalenessBuffer };
@@ -62,12 +55,12 @@ export function createOracleModule(params: OracleModuleParams): OracleModule {
       const [[, answer, , updatedAt], decimals] = await Promise.all([
         publicClient.readContract({
           address: feed.aggregator,
-          abi: aggregatorAbi,
+          abi: MockV3AggregatorAbi,
           functionName: 'latestRoundData',
         }),
         publicClient.readContract({
           address: feed.aggregator,
-          abi: aggregatorAbi,
+          abi: MockV3AggregatorAbi,
           functionName: 'decimals',
         }),
       ]);

@@ -12,9 +12,7 @@ import { createVaultModule, type VaultModule } from './vault';
 
 export interface CreateEqueClientParams {
   chain: EqueChainName;
-  /** Overrides the chain's public default; use a private endpoint for real traffic. */
   rpcUrl?: string;
-  /** Injected at runtime (wallet account, private-key account, ...). The SDK never holds keys itself. */
   signer?: Account;
 }
 
@@ -32,14 +30,16 @@ export interface EqueClient {
   faucet: FaucetModule;
 }
 
-/**
- * Builds the client surface for one chain: viem clients plus that chain's
- * deployed addresses, so callers never juggle addresses by hand.
- */
 export function createEqueClient(params: CreateEqueClientParams): EqueClient {
   const { chain, rpcUrl, signer } = params;
   const definition = getEqueChain(chain);
   const addresses = getAddresses(chain);
+
+  if (definition.id !== addresses.chainId) {
+    throw new Error(
+      `Deployment record for ${chain} is for chainId ${addresses.chainId}, but ${chain} is chainId ${definition.id}. Run npm run sync:addresses after deploying.`,
+    );
+  }
 
   const transport = rpcUrl === undefined ? http() : http(rpcUrl);
   const publicClient = createPublicClient<Transport, EqueChain>({ chain: definition, transport });

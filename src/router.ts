@@ -1,12 +1,6 @@
-import { parseAbi, type Address, type Hash } from 'viem';
+import type { Address, Hash } from 'viem';
+import { EqueRouterAbi, EqueVaultAbi } from './abis';
 import { requireSigner, type EquePublicClient, type EqueWalletClient } from './internal';
-
-const routerAbi = parseAbi([
-  'function planAllocation(address vault) view returns (address[] strategies, uint256[] amounts)',
-  'function weights(address vault) view returns (uint256 epochBps, uint256 lendingBps)',
-]);
-
-const vaultAbi = parseAbi(['function allocate()']);
 
 export interface TargetWeights {
   epochBps: bigint;
@@ -40,7 +34,7 @@ export function createRouterModule(params: RouterModuleParams): RouterModule {
     async targetWeights() {
       const [epochBps, lendingBps] = await publicClient.readContract({
         address: router,
-        abi: routerAbi,
+        abi: EqueRouterAbi,
         functionName: 'weights',
         args: [vault],
       });
@@ -49,7 +43,7 @@ export function createRouterModule(params: RouterModuleParams): RouterModule {
     async planAllocation() {
       const [strategies, amounts] = await publicClient.readContract({
         address: router,
-        abi: routerAbi,
+        abi: EqueRouterAbi,
         functionName: 'planAllocation',
         args: [vault],
       });
@@ -58,7 +52,7 @@ export function createRouterModule(params: RouterModuleParams): RouterModule {
     async allocate() {
       return requireSigner(walletClient).writeContract({
         address: vault,
-        abi: vaultAbi,
+        abi: EqueVaultAbi,
         functionName: 'allocate',
       });
     },

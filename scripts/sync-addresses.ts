@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { format } from "prettier";
 
 /**
  * Regenerates src/addresses.ts from the deployment artifacts the contracts
@@ -121,10 +122,11 @@ const source = [
   "",
 ].join("\n");
 
+const formatted = await format(source, { filepath: outputFile });
 const previous = existsSync(outputFile) ? readFileSync(outputFile, "utf8") : "";
-if (previous === source) {
+if (previous === formatted) {
   console.log(`src/addresses.ts unchanged (${networks.length} networks: ${networks.join(", ")})`);
 } else {
-  writeFileSync(outputFile, source);
+  writeFileSync(outputFile, formatted);
   console.log(`src/addresses.ts written (${networks.length} networks: ${networks.join(", ")})`);
 }

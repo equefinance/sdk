@@ -1,13 +1,6 @@
-import { parseAbi, type Address, type Hash } from 'viem';
+import type { Address, Hash } from 'viem';
+import { EpochStrategyAbi } from './abis';
 import { requireSigner, type EquePublicClient, type EqueWalletClient } from './internal';
-
-const strategyAbi = parseAbi([
-  'function currentEpoch() view returns ((uint128 id, uint128 notional, uint64 start, uint64 auctionEnd, uint64 expiry, uint96 strike, uint96 spot, address highBidder, uint96 highBid, uint256 extensionCount))',
-  'function startEpoch(bool bypassMarketHours)',
-  'function closeAuction()',
-  'function settleEpoch()',
-  'function state() view returns (uint8)',
-]);
 
 export type EpochState = 'None' | 'Auction' | 'Locked' | 'Settled';
 
@@ -57,7 +50,7 @@ export function createEpochModule(params: EpochModuleParams): EpochModule {
   const currentEpoch = async (): Promise<EpochInfo> =>
     publicClient.readContract({
       address: strategy,
-      abi: strategyAbi,
+      abi: EpochStrategyAbi,
       functionName: 'currentEpoch',
     });
 
@@ -72,7 +65,7 @@ export function createEpochModule(params: EpochModuleParams): EpochModule {
     async startEpoch(bypassMarketHours = false) {
       return requireSigner(walletClient).writeContract({
         address: strategy,
-        abi: strategyAbi,
+        abi: EpochStrategyAbi,
         functionName: 'startEpoch',
         args: [bypassMarketHours],
       });
@@ -80,21 +73,21 @@ export function createEpochModule(params: EpochModuleParams): EpochModule {
     async closeAuction() {
       return requireSigner(walletClient).writeContract({
         address: strategy,
-        abi: strategyAbi,
+        abi: EpochStrategyAbi,
         functionName: 'closeAuction',
       });
     },
     async settleEpoch() {
       return requireSigner(walletClient).writeContract({
         address: strategy,
-        abi: strategyAbi,
+        abi: EpochStrategyAbi,
         functionName: 'settleEpoch',
       });
     },
     async state() {
       const raw = await publicClient.readContract({
         address: strategy,
-        abi: strategyAbi,
+        abi: EpochStrategyAbi,
         functionName: 'state',
       });
       return decodeEpochState(Number(raw));

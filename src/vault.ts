@@ -1,20 +1,7 @@
-import { parseAbi, type Address, type Hash } from 'viem';
-import {
-  erc20ApproveAbi,
-  requireSigner,
-  type EquePublicClient,
-  type EqueWalletClient,
-} from './internal';
-
-const vaultAbi = parseAbi([
-  'function asset() view returns (address)',
-  'function balanceOf(address account) view returns (uint256)',
-  'function convertToAssets(uint256 shares) view returns (uint256)',
-  'function deposit(uint256 assets, address receiver) returns (uint256)',
-  'function requestRedeem(uint256 shares)',
-  'function claim() returns (uint256)',
-  'function totalAssets() view returns (uint256)',
-]);
+import { erc20Abi } from 'viem';
+import type { Address, Hash } from 'viem';
+import { EqueVaultAbi } from './abis';
+import { requireSigner, type EquePublicClient, type EqueWalletClient } from './internal';
 
 export interface VaultModuleParams {
   publicClient: EquePublicClient;
@@ -43,7 +30,7 @@ export function createVaultModule(params: VaultModuleParams): VaultModule {
     if (cachedAsset === undefined) {
       cachedAsset = await publicClient.readContract({
         address: vault,
-        abi: vaultAbi,
+        abi: EqueVaultAbi,
         functionName: 'asset',
       });
     }
@@ -57,7 +44,7 @@ export function createVaultModule(params: VaultModuleParams): VaultModule {
       const wallet = requireSigner(walletClient);
       return wallet.writeContract({
         address: await asset(),
-        abi: erc20ApproveAbi,
+        abi: erc20Abi,
         functionName: 'approve',
         args: [vault, amount],
       });
@@ -66,7 +53,7 @@ export function createVaultModule(params: VaultModuleParams): VaultModule {
       const wallet = requireSigner(walletClient);
       return wallet.writeContract({
         address: vault,
-        abi: vaultAbi,
+        abi: EqueVaultAbi,
         functionName: 'deposit',
         args: [assets, receiver ?? wallet.account.address],
       });
@@ -74,7 +61,7 @@ export function createVaultModule(params: VaultModuleParams): VaultModule {
     async requestRedeem(shares) {
       return requireSigner(walletClient).writeContract({
         address: vault,
-        abi: vaultAbi,
+        abi: EqueVaultAbi,
         functionName: 'requestRedeem',
         args: [shares],
       });
@@ -82,25 +69,25 @@ export function createVaultModule(params: VaultModuleParams): VaultModule {
     async claim() {
       return requireSigner(walletClient).writeContract({
         address: vault,
-        abi: vaultAbi,
+        abi: EqueVaultAbi,
         functionName: 'claim',
       });
     },
     balanceOf: (account) =>
       publicClient.readContract({
         address: vault,
-        abi: vaultAbi,
+        abi: EqueVaultAbi,
         functionName: 'balanceOf',
         args: [account],
       }),
     convertToAssets: (shares) =>
       publicClient.readContract({
         address: vault,
-        abi: vaultAbi,
+        abi: EqueVaultAbi,
         functionName: 'convertToAssets',
         args: [shares],
       }),
     totalAssets: () =>
-      publicClient.readContract({ address: vault, abi: vaultAbi, functionName: 'totalAssets' }),
+      publicClient.readContract({ address: vault, abi: EqueVaultAbi, functionName: 'totalAssets' }),
   };
 }

@@ -1,4 +1,4 @@
-import { type Address } from 'viem';
+import type { Address } from 'viem';
 
 /** One chain's deployed Eque stack, as recorded by the deploy script. */
 export interface EqueDeployment {
@@ -15,7 +15,7 @@ export interface EqueDeployment {
 }
 
 export const deployments: Record<string, EqueDeployment> = {
-  'base-sepolia': {
+  baseSepolia: {
     chainId: 84532,
     deployedAt: '2026-09-26T23:19:53.265Z',
     deployer: '0x00000ac095ab728feebef880a3d4801f71732808',
@@ -67,7 +67,7 @@ export const deployments: Record<string, EqueDeployment> = {
     factory: '0x4a960a6807951a678550afb1aecca82247e289a8',
     faucet: '0xc2ec5d2905b22e7dec50b20807df91e1953d7b48',
   },
-  'robinhood-testnet': {
+  robinhoodTestnet: {
     chainId: 46630,
     deployedAt: '2026-09-27T00:04:06.848Z',
     deployer: '0x00000ac095ab728feebef880a3d4801f71732808',

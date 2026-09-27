@@ -1,7 +1,6 @@
 {
   "name": "@eque/sdk",
   "version": "1.0.0",
-  "private": true,
   "description": "Shared TypeScript client for the Eque contracts: ABIs, addresses, and viem helpers.",
   "type": "module",
   "sideEffects": false,
@@ -26,7 +25,6 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "sync:addresses": "node scripts/sync-addresses.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
