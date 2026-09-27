@@ -1,6 +1,6 @@
 {
   "name": "@eque/sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shared TypeScript client for the Eque contracts: ABIs, addresses, and viem helpers.",
   "type": "module",
   "sideEffects": false,
